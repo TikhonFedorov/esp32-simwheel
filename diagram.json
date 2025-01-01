@@ -1,0 +1,115 @@
+{
+  "version": 1,
+  "author": "Anonymous maker",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "board-esp32-devkit-c-v4", "id": "esp", "top": 0, "left": 0, "attrs": {} },
+    {
+      "type": "wokwi-pushbutton",
+      "id": "btn1",
+      "top": 54.2,
+      "left": -134.4,
+      "attrs": { "color": "green" }
+    },
+    {
+      "type": "wokwi-pushbutton",
+      "id": "btn2",
+      "top": 102.2,
+      "left": -134.4,
+      "attrs": { "color": "red" }
+    },
+    {
+      "type": "wokwi-pushbutton",
+      "id": "btn3",
+      "top": 159.8,
+      "left": -134.4,
+      "attrs": { "color": "blue" }
+    },
+    {
+      "type": "wokwi-pushbutton",
+      "id": "btn4",
+      "top": 131,
+      "left": 144,
+      "attrs": { "color": "yellow" }
+    },
+    {
+      "type": "wokwi-pushbutton",
+      "id": "btn5",
+      "top": 73.4,
+      "left": 144,
+      "attrs": { "color": "black" }
+    },
+    {
+      "type": "wokwi-pushbutton",
+      "id": "btn6",
+      "top": 25.4,
+      "left": 144,
+      "attrs": { "color": "white" }
+    },
+    {
+      "type": "wokwi-pushbutton",
+      "id": "btn7",
+      "top": -22.6,
+      "left": 144,
+      "attrs": { "color": "grey" }
+    },
+    {
+      "type": "wokwi-pushbutton",
+      "id": "btn8",
+      "top": -70.6,
+      "left": 144,
+      "attrs": { "color": "red" }
+    },
+    { "type": "wokwi-ky-040", "id": "encoder1", "top": 232.1, "left": -144.8, "attrs": {} },
+    { "type": "wokwi-ky-040", "id": "encoder2", "top": 232.1, "left": 66.4, "attrs": {} },
+    {
+      "type": "wokwi-pushbutton-6mm",
+      "id": "btn9",
+      "top": -127,
+      "left": -9.6,
+      "attrs": { "color": "black" }
+    },
+    {
+      "type": "wokwi-pushbutton-6mm",
+      "id": "btn10",
+      "top": -127,
+      "left": 76.8,
+      "attrs": { "color": "black" }
+    }
+  ],
+  "connections": [
+    [ "esp:TX", "$serialMonitor:RX", "", [] ],
+    [ "esp:RX", "$serialMonitor:TX", "", [] ],
+    [ "esp:13", "btn2:1.l", "green", [ "h0" ] ],
+    [ "esp:14", "btn3:1.l", "green", [ "h-100.61", "v-19.2" ] ],
+    [ "esp:12", "btn1:1.l", "green", [ "v-172.8", "h-235.01" ] ],
+    [ "esp:15", "btn4:1.l", "green", [ "v0" ] ],
+    [ "esp:16", "btn5:1.l", "green", [ "h0" ] ],
+    [ "esp:17", "btn6:1.l", "green", [ "h0" ] ],
+    [ "btn7:1.l", "esp:18", "green", [ "h-48", "v115.2" ] ],
+    [ "esp:19", "btn8:1.l", "green", [ "h0" ] ],
+    [ "btn4:2.r", "esp:GND.3", "green", [ "h0" ] ],
+    [ "btn5:2.r", "esp:GND.3", "green", [ "h0" ] ],
+    [ "btn6:2.r", "esp:GND.3", "green", [ "h0" ] ],
+    [ "btn7:2.r", "esp:GND.3", "green", [ "h0" ] ],
+    [ "btn8:2.r", "esp:GND.3", "green", [ "h0" ] ],
+    [ "esp:GND.1", "btn3:2.r", "black", [ "h0" ] ],
+    [ "esp:GND.1", "btn2:2.r", "black", [ "h0" ] ],
+    [ "esp:GND.1", "btn1:2.r", "black", [ "h0" ] ],
+    [ "esp:22", "encoder2:CLK", "green", [ "h0" ] ],
+    [ "encoder2:DT", "esp:23", "green", [ "h0" ] ],
+    [ "encoder2:SW", "esp:25", "green", [ "h0" ] ],
+    [ "encoder2:GND", "esp:GND.3", "black", [ "h0" ] ],
+    [ "encoder1:GND", "esp:GND.1", "black", [ "h0" ] ],
+    [ "encoder1:CLK", "esp:26", "green", [ "h0" ] ],
+    [ "esp:27", "encoder1:DT", "green", [ "h0" ] ],
+    [ "encoder1:SW", "esp:32", "green", [ "h0" ] ],
+    [ "esp:3V3", "encoder1:VCC", "green", [ "h0" ] ],
+    [ "esp:3V3", "encoder2:VCC", "green", [ "h0" ] ],
+    [ "esp:GND.2", "btn10:2.r", "black", [ "v-86.4", "h4.04" ] ],
+    [ "btn9:2.r", "esp:GND.2", "green", [ "h0" ] ],
+    [ "esp:5", "btn10:1.l", "green", [ "h0" ] ],
+    [ "esp:4", "btn9:1.l", "green", [ "h0" ] ]
+  ],
+  "dependencies": {}
+}
