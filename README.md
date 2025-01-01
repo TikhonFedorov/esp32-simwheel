@@ -1,4 +1,4 @@
-# esp32-simwheel
+# ESP32 Simracing Wheel Addon Project
 
 ## **ESP32 Pin Configuration**
 
