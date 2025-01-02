@@ -1,3 +1,5 @@
+#include <EEPROM.h>
+
 // Пины для подрулевых лепестков
 const int paddleLeft = 4;  // Левый лепесток
 const int paddleRight = 5; // Правый лепесток
@@ -44,8 +46,25 @@ void readEncoder2() {
   }
 }
 
+void saveEncoderPosition() {
+  // Сохраняем позиции энкодеров в EEPROM
+  EEPROM.write(0, encoder1Position & 0xFF);           // Младший байт для encoder1Position
+  EEPROM.write(1, (encoder1Position >> 8) & 0xFF);    // Старший байт для encoder1Position
+  EEPROM.write(2, encoder2Position & 0xFF);           // Младший байт для encoder2Position
+  EEPROM.write(3, (encoder2Position >> 8) & 0xFF);    // Старший байт для encoder2Position
+}
+
+void loadEncoderPosition() {
+  // Загружаем позиции энкодеров из EEPROM
+  encoder1Position = EEPROM.read(0) | (EEPROM.read(1) << 8);
+  encoder2Position = EEPROM.read(2) | (EEPROM.read(3) << 8);
+}
+
 void setup() {
   Serial.begin(115200);
+
+  // Загружаем сохраненные позиции энкодеров
+  loadEncoderPosition();
 
   // Инициализация кнопок
   for (int i = 0; i < numButtons; i++) {
@@ -126,12 +145,15 @@ void loop() {
     Serial.println(encoder1Position);
     lastEncoder1Position = encoder1Position;
   }
-  
+
   if (encoder2Position != lastEncoder2Position) {
     Serial.print("Encoder 2 Position: ");
     Serial.println(encoder2Position);
     lastEncoder2Position = encoder2Position;
   }
+
+  // Сохраняем позиции энкодеров каждый раз, когда они изменяются
+  saveEncoderPosition();
 
   delay(100); // Задержка для стабильности вывода
 }
