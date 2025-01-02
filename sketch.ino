@@ -16,16 +16,33 @@ const int encoder2DT = 27;  // Сигнал B энкодера 2
 const int encoder2SW = 32;  // Кнопка энкодера 2
 
 // Переменные для отслеживания положения энкодеров
-int encoder1Position = 0;
-int encoder2Position = 0;
-int lastStateCLK1;
-int lastStateCLK2;
+volatile int encoder1Position = 0;
+volatile int encoder2Position = 0;
+int lastEncoder1Position = 0;
+int lastEncoder2Position = 0;
 
 // Переменные для отслеживания состояния кнопок и дребезга
 unsigned long lastDebounceTime[numButtons + 2] = {0}; // +2 для лепестков
 bool buttonState[numButtons + 2] = {false};          // Состояние кнопок
 bool lastButtonState[numButtons + 2] = {true};       // Предыдущее состояние кнопок
 const unsigned long debounceDelay = 50;             // Задержка debounce
+
+// Функции обработки прерываний
+void readEncoder1() {
+  if (digitalRead(encoder1DT) == HIGH) {
+    encoder1Position++;
+  } else {
+    encoder1Position--;
+  }
+}
+
+void readEncoder2() {
+  if (digitalRead(encoder2DT) == HIGH) {
+    encoder2Position++;
+  } else {
+    encoder2Position--;
+  }
+}
 
 void setup() {
   Serial.begin(115200);
@@ -47,8 +64,9 @@ void setup() {
   pinMode(paddleLeft, INPUT_PULLUP);
   pinMode(paddleRight, INPUT_PULLUP);
 
-  lastStateCLK1 = digitalRead(encoder1CLK);
-  lastStateCLK2 = digitalRead(encoder2CLK);
+  // Настройка прерываний для энкодеров
+  attachInterrupt(digitalPinToInterrupt(encoder1CLK), readEncoder1, FALLING);
+  attachInterrupt(digitalPinToInterrupt(encoder2CLK), readEncoder2, FALLING);
 }
 
 void loop() {
@@ -102,38 +120,18 @@ void loop() {
   }
   lastButtonState[numButtons + 1] = currentPaddleStateRight;
 
-  // Обработка энкодеров
-  int currentStateCLK1 = digitalRead(encoder1CLK);
-  if (currentStateCLK1 != lastStateCLK1) {
-    if (digitalRead(encoder1DT) != currentStateCLK1) {
-      encoder1Position++;
-    } else {
-      encoder1Position--;
-    }
+  // Печать позиции энкодеров только при изменении
+  if (encoder1Position != lastEncoder1Position) {
     Serial.print("Encoder 1 Position: ");
     Serial.println(encoder1Position);
+    lastEncoder1Position = encoder1Position;
   }
-  lastStateCLK1 = currentStateCLK1;
-
-  if (digitalRead(encoder1SW) == LOW && (currentTime - lastDebounceTime[numButtons]) > debounceDelay) {
-    lastDebounceTime[numButtons] = currentTime;
-    Serial.println("Encoder 1 button pressed");
-  }
-
-  int currentStateCLK2 = digitalRead(encoder2CLK);
-  if (currentStateCLK2 != lastStateCLK2) {
-    if (digitalRead(encoder2DT) != currentStateCLK2) {
-      encoder2Position++;
-    } else {
-      encoder2Position--;
-    }
+  
+  if (encoder2Position != lastEncoder2Position) {
     Serial.print("Encoder 2 Position: ");
     Serial.println(encoder2Position);
+    lastEncoder2Position = encoder2Position;
   }
-  lastStateCLK2 = currentStateCLK2;
 
-  if (digitalRead(encoder2SW) == LOW && (currentTime - lastDebounceTime[numButtons + 1]) > debounceDelay) {
-    lastDebounceTime[numButtons + 1] = currentTime;
-    Serial.println("Encoder 2 button pressed");
-  }
+  delay(100); // Задержка для стабильности вывода
 }
