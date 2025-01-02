@@ -21,6 +21,12 @@ int encoder2Position = 0;
 int lastStateCLK1;
 int lastStateCLK2;
 
+// Переменные для отслеживания состояния кнопок и дребезга
+unsigned long lastDebounceTime[numButtons + 2] = {0}; // +2 для лепестков
+bool buttonState[numButtons + 2] = {false};          // Состояние кнопок
+bool lastButtonState[numButtons + 2] = {true};       // Предыдущее состояние кнопок
+const unsigned long debounceDelay = 50;             // Задержка debounce
+
 void setup() {
   Serial.begin(115200);
 
@@ -33,7 +39,6 @@ void setup() {
   pinMode(encoder1CLK, INPUT);
   pinMode(encoder1DT, INPUT);
   pinMode(encoder1SW, INPUT_PULLUP);
-
   pinMode(encoder2CLK, INPUT);
   pinMode(encoder2DT, INPUT);
   pinMode(encoder2SW, INPUT_PULLUP);
@@ -42,23 +47,62 @@ void setup() {
   pinMode(paddleLeft, INPUT_PULLUP);
   pinMode(paddleRight, INPUT_PULLUP);
 
-  // Чтение начального состояния CLK для энкодеров
   lastStateCLK1 = digitalRead(encoder1CLK);
   lastStateCLK2 = digitalRead(encoder2CLK);
 }
 
 void loop() {
-  // Чтение состояния кнопок
+  unsigned long currentTime = millis();
+
+  // Проверка состояния кнопок с debounce
   for (int i = 0; i < numButtons; i++) {
-    if (digitalRead(buttonPins[i]) == LOW) {
-      Serial.print("Button ");
-      Serial.print(i + 1);
-      Serial.println(" pressed");
-      delay(50); // Защита от дребезга
+    bool currentButtonState = digitalRead(buttonPins[i]) == LOW;
+    if (currentButtonState != lastButtonState[i]) {
+      lastDebounceTime[i] = currentTime;
     }
+    if ((currentTime - lastDebounceTime[i]) > debounceDelay) {
+      if (currentButtonState != buttonState[i]) {
+        buttonState[i] = currentButtonState;
+        if (buttonState[i]) {
+          Serial.print("Button ");
+          Serial.print(i + 1);
+          Serial.println(" pressed");
+        }
+      }
+    }
+    lastButtonState[i] = currentButtonState;
   }
 
-  // Обработка энкодера 1
+  // Обработка подрулевых лепестков
+  bool currentPaddleStateLeft = digitalRead(paddleLeft) == LOW;
+  if (currentPaddleStateLeft != lastButtonState[numButtons]) {
+    lastDebounceTime[numButtons] = currentTime;
+  }
+  if ((currentTime - lastDebounceTime[numButtons]) > debounceDelay) {
+    if (currentPaddleStateLeft != buttonState[numButtons]) {
+      buttonState[numButtons] = currentPaddleStateLeft;
+      if (buttonState[numButtons]) {
+        Serial.println("Left paddle pressed");
+      }
+    }
+  }
+  lastButtonState[numButtons] = currentPaddleStateLeft;
+
+  bool currentPaddleStateRight = digitalRead(paddleRight) == LOW;
+  if (currentPaddleStateRight != lastButtonState[numButtons + 1]) {
+    lastDebounceTime[numButtons + 1] = currentTime;
+  }
+  if ((currentTime - lastDebounceTime[numButtons + 1]) > debounceDelay) {
+    if (currentPaddleStateRight != buttonState[numButtons + 1]) {
+      buttonState[numButtons + 1] = currentPaddleStateRight;
+      if (buttonState[numButtons + 1]) {
+        Serial.println("Right paddle pressed");
+      }
+    }
+  }
+  lastButtonState[numButtons + 1] = currentPaddleStateRight;
+
+  // Обработка энкодеров
   int currentStateCLK1 = digitalRead(encoder1CLK);
   if (currentStateCLK1 != lastStateCLK1) {
     if (digitalRead(encoder1DT) != currentStateCLK1) {
@@ -71,7 +115,11 @@ void loop() {
   }
   lastStateCLK1 = currentStateCLK1;
 
-  // Обработка энкодера 2
+  if (digitalRead(encoder1SW) == LOW && (currentTime - lastDebounceTime[numButtons]) > debounceDelay) {
+    lastDebounceTime[numButtons] = currentTime;
+    Serial.println("Encoder 1 button pressed");
+  }
+
   int currentStateCLK2 = digitalRead(encoder2CLK);
   if (currentStateCLK2 != lastStateCLK2) {
     if (digitalRead(encoder2DT) != currentStateCLK2) {
@@ -84,25 +132,8 @@ void loop() {
   }
   lastStateCLK2 = currentStateCLK2;
 
-  // Обработка кнопок энкодеров
-  if (digitalRead(encoder1SW) == LOW) {
-    Serial.println("Encoder 1 button pressed");
-    delay(50); // Защита от дребезга
-  }
-
-  if (digitalRead(encoder2SW) == LOW) {
+  if (digitalRead(encoder2SW) == LOW && (currentTime - lastDebounceTime[numButtons + 1]) > debounceDelay) {
+    lastDebounceTime[numButtons + 1] = currentTime;
     Serial.println("Encoder 2 button pressed");
-    delay(50); // Защита от дребезга
-  }
-
-  // Обработка подрулевых лепестков
-  if (digitalRead(paddleLeft) == LOW) {
-    Serial.println("Left paddle pressed");
-    delay(50); // Защита от дребезга
-  }
-
-  if (digitalRead(paddleRight) == LOW) {
-    Serial.println("Right paddle pressed");
-    delay(50); // Защита от дребезга
   }
 }
