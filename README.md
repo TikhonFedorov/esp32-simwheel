@@ -19,5 +19,8 @@
 
 ---
 
-
 Wokwi link: https://wokwi.com/projects/418902648415366145
+
+---
+Used libs:
+Encoder - https://www.arduinolibraries.info/libraries/encoder
